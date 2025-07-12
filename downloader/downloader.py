@@ -1,9 +1,13 @@
+# downloader.py (完整整合，含保存 cookies + 下载 + 列出 cookie 文件)
+
 import struct
 import sys
 import json
 import subprocess
 import os
 
+COOKIE_DIR = os.path.join(os.path.dirname(__file__), "cookies")
+os.makedirs(COOKIE_DIR, exist_ok=True)
 
 def read_message():
     raw_length = sys.stdin.buffer.read(4)
@@ -13,13 +17,11 @@ def read_message():
     message = sys.stdin.buffer.read(message_length).decode('utf-8')
     return json.loads(message)
 
-
 def send_message(message):
     encoded = json.dumps(message).encode('utf-8')
     sys.stdout.buffer.write(struct.pack('<I', len(encoded)))
     sys.stdout.buffer.write(encoded)
     sys.stdout.buffer.flush()
-
 
 def run_yt_dlp(url, headers=None, cookies=None, output_dir=None, proxy=None):
     cmd = ["yt-dlp", url]
@@ -29,10 +31,8 @@ def run_yt_dlp(url, headers=None, cookies=None, output_dir=None, proxy=None):
             cmd += ["--add-header", f"{k}: {v}"]
 
     if cookies and os.path.isfile(cookies):
-        # ✅ ✅ 写入当前使用的 cookies 文件路径到 log.txt
         with open("log.txt", "a", encoding="utf-8") as f:
             f.write(f"使用 cookies 文件: {cookies}\n")
-
         cmd += ["--cookies", cookies]
 
     if output_dir:
@@ -46,7 +46,6 @@ def run_yt_dlp(url, headers=None, cookies=None, output_dir=None, proxy=None):
     if proxy:
         cmd += ["--proxy", proxy]
 
-    # 写入最终命令到日志
     with open("log.txt", "a", encoding="utf-8") as f:
         f.write("运行命令: " + " ".join(cmd) + "\n")
 
@@ -58,7 +57,10 @@ def run_yt_dlp(url, headers=None, cookies=None, output_dir=None, proxy=None):
         "success": result.returncode == 0
     }
 
-
+def list_cookie_files():
+    if not os.path.isdir(COOKIE_DIR):
+        return []
+    return [f for f in os.listdir(COOKIE_DIR) if f.endswith(".txt")]
 
 if __name__ == '__main__':
     try:
@@ -67,16 +69,19 @@ if __name__ == '__main__':
 
         data = read_message()
 
-        # ✨ 新增逻辑：保存 cookies 文件
         if data.get("type") == "save_cookies":
             filename = data.get("filename", "cookies.txt")
-            path = os.path.join(os.path.dirname(__file__), filename)
+            path = os.path.join(COOKIE_DIR, filename)
             with open(path, "w", encoding="utf-8") as f:
                 f.write(data.get("content", ""))
             send_message({"success": True, "saved_as": filename})
             sys.exit(0)
 
-        # 下载逻辑
+        if data.get("type") == "list_cookies":
+            files = list_cookie_files()
+            send_message({"success": True, "files": files})
+            sys.exit(0)
+
         url = data.get("url")
         headers = data.get("headers", {})
         cookies = data.get("cookies")

@@ -96,3 +96,15 @@ input, textarea, button {
 .hidden {
   display: none;
 }
+/* cookie 文件列表样式 */
+.cookie-file-item {
+  padding: 6px 8px;
+  margin-bottom: 5px;
+  background: #eef2f7;
+  border-radius: 4px;
+  font-size: 13px;
+  -webkit-user-select: none; /* ✅ 兼容 Safari / iOS */
+  user-select: none;         /* ✅ 标准属性，支持主流现代浏览器 */
+  cursor: default;
+}
+
