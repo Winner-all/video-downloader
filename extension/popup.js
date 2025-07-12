@@ -10,6 +10,11 @@ document.querySelectorAll(".tab").forEach((tabBtn) => {
     const selected = tabBtn.dataset.tab;
     tabBtn.classList.add("active");
     document.getElementById(`tab-${selected}`).classList.remove("hidden");
+
+    // 如果切换到历史记录，自动加载
+    if (selected === "history") {
+      loadDownloadHistory();
+    }
   });
 });
 
@@ -26,14 +31,13 @@ document.getElementById("detectBtn").addEventListener("click", async () => {
 
 // 发送下载请求
 document.getElementById("sendBtn").addEventListener("click", () => {
-  const url = document.getElementById("urlInput").value;
+  const url = document.getElementById("urlInput").value.trim();
 
   if (!url) {
     alert("请输入视频链接！");
     return;
   }
 
-  // ✅ 自动根据 URL 构造 cookies 文件路径
   const hostname = new URL(url).hostname.replace(/\./g, "_");
   const cookiesPath = `D:/VSCode/VCWork/videoDownload/downloader/cookies_${hostname}.txt`;
 
@@ -42,10 +46,33 @@ document.getElementById("sendBtn").addEventListener("click", () => {
 
   port.onMessage.addListener((msg) => {
     hasResponse = true;
+
     document.getElementById("result").textContent =
       msg.success
         ? "✅ 下载成功:\n" + msg.stdout
         : "❌ 下载失败:\n" + (msg.stderr || msg.error || "未知错误");
+
+    if (msg.success) {
+      const filenameMatch = msg.stdout.match(/Destination: (.+)$/m);
+      const filename = filenameMatch ? filenameMatch[1] : "未知文件";
+
+      const time = new Date().toLocaleString();
+
+      const newRecord = { url, time, filename };
+
+      chrome.storage.local.get("downloadHistory", (data) => {
+        const history = data.downloadHistory || [];
+        history.unshift(newRecord);
+        if (history.length > 100) history.pop();
+
+        chrome.storage.local.set({ downloadHistory: history }, () => {
+          // 如果当前正显示历史，刷新显示
+          if (document.querySelector(".tab.active").dataset.tab === "history") {
+            loadDownloadHistory();
+          }
+        });
+      });
+    }
   });
 
   port.onDisconnect.addListener(() => {
@@ -59,7 +86,7 @@ document.getElementById("sendBtn").addEventListener("click", () => {
     url: url,
     headers: {
       "User-Agent": navigator.userAgent,
-      "Referer": url  // ✅ 改为自动使用当前视频地址作为 Referer
+      "Referer": url
     },
     cookies: cookiesPath,
     output_dir: "D:/VideoDownloader/downloads",
@@ -122,3 +149,53 @@ document.getElementById("saveSiteConfig").addEventListener("click", () => {
     });
   });
 });
+
+// --- 下载历史相关 ---
+// 加载并显示下载历史
+function loadDownloadHistory() {
+  chrome.storage.local.get("downloadHistory", (data) => {
+    const history = data.downloadHistory || [];
+    const container = document.getElementById("tab-history");
+
+    if (history.length === 0) {
+      container.innerHTML = "<p>暂无下载历史</p>";
+      return;
+    }
+
+    const formatted = history.map((item, index) => {
+      return `
+        <div class="history-item" data-index="${index}">
+          <div><strong>时间：</strong>${item.time}</div>
+          <div><strong>链接：</strong><a href="${item.url}" target="_blank">${item.url}</a></div>
+          <div><strong>文件：</strong>${item.filename}</div>
+          <button class="delete-history-btn" data-index="${index}">删除</button>
+        </div>
+        <hr />
+      `;
+    }).join("");
+
+    container.innerHTML = formatted;
+
+    // 添加删除按钮事件
+    container.querySelectorAll(".delete-history-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const idx = Number(e.target.dataset.index);
+        deleteHistoryItem(idx);
+      });
+    });
+  });
+}
+
+// 删除单条历史记录
+function deleteHistoryItem(index) {
+  chrome.storage.local.get("downloadHistory", (data) => {
+    const history = data.downloadHistory || [];
+    if (index < 0 || index >= history.length) return;
+
+    history.splice(index, 1); // 删除该项
+
+    chrome.storage.local.set({ downloadHistory: history }, () => {
+      loadDownloadHistory();
+    });
+  });
+}

@@ -44,3 +44,55 @@ input, textarea, button {
   margin-bottom: 4px;
   box-sizing: border-box;
 }
+/* popup.css */
+
+/* 历史记录项 */
+.history-item {
+  padding: 8px 5px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  line-height: 1.4em;
+}
+
+.history-item div {
+  margin-bottom: 3px;
+  word-break: break-all;
+}
+
+.history-item a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+.history-item a:hover {
+  text-decoration: underline;
+}
+
+.delete-history-btn {
+  background-color: #e74c3c;
+  border: none;
+  color: white;
+  padding: 3px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.delete-history-btn:hover {
+  background-color: #c0392b;
+}
+
+/* tab 内容区滚动控制 */
+.tab-content {
+  padding: 10px;
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+/* 隐藏的tab内容 */
+.hidden {
+  display: none;
+}
