@@ -1,0 +1,6 @@
+/* popup.css */
+#result {
+  max-height: 300px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}

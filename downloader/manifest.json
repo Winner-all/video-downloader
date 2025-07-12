@@ -1,0 +1,9 @@
+{
+  "name": "com.yourdomain.ytdlp_downloader",
+  "description": "Native host to run yt-dlp with headers",
+  "path": "D:\\VSCode\\VCWork\\videoDownload\\downloader\\downloader.bat",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://obopdiacciahepjllpacgkipmelonhhp/"
+  ]
+}

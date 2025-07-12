@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "videoDownload",
+  "version": "1.0",
+  "description": "嗅探网页视频并发送给本地下载器",
+  "permissions": [
+    "nativeMessaging",
+    "webRequest",
+    "webRequestBlocking",
+    "*://*.bilibili.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.bilibili.com/*"],
+      "js": ["content-script.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+}

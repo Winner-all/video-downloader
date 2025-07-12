@@ -1,0 +1,11 @@
+# Python cache
+__pycache__/
+*.py[cod]
+# VSCode 设置
+.vscode/
+# 日志文件
+log.txt
+# 下载目录
+downloads/
+# 扩展编译产物、临时文件
+*.crx
