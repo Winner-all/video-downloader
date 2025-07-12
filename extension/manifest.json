@@ -5,9 +5,11 @@
   "description": "嗅探网页视频并发送给本地下载器",
   "permissions": [
     "nativeMessaging",
-    "webRequest",
-    "webRequestBlocking",
-    "*://*.bilibili.com/*"
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://*/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -15,16 +17,16 @@
   "action": {
     "default_popup": "popup.html"
   },
+  "default_icon": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
   "content_scripts": [
     {
-      "matches": ["*://*.bilibili.com/*"],
+      "matches": ["<all_urls>"],
       "js": ["content-script.js"],
-      "run_at": "document_start"
+      "run_at": "document_idle"
     }
-  ],
-  "default_icon": {
-      "16": "icon.png",
-      "48": "icon.png",
-      "128": "icon.png"
-    }
+  ]
 }
