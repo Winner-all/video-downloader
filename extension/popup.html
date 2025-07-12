@@ -1,18 +1,46 @@
+<!-- extension/popup.html -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <title>下载视频</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <title>视频下载器</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="popup.css" />
 </head>
 <body>
-  <input type="text" id="urlInput" placeholder="粘贴视频链接">
-  <button id="detectBtn">从当前页面提取视频链接</button>
-  <button id="getCookiesBtn">提取当前页面 Cookies</button>
-  <button id="sendBtn">发送下载请求</button>
-  <pre id="result"></pre>
-  <script src="popup.js"></script>
-  <script type="module" src="popup.js"></script>
+  <div class="tab-bar">
+    <button class="tab active" data-tab="download">下载</button>
+    <button class="tab" data-tab="history">历史记录</button>
+    <button class="tab" data-tab="sites">站点设置</button>
+    <button class="tab" data-tab="cookies">Cookie</button>
+  </div>
+
+  <div class="tab-content" id="tab-download">
+    <input type="text" id="urlInput" placeholder="粘贴视频链接" />
+    <button id="detectBtn">获取当前页面链接</button>
+    <button id="sendBtn">发送下载请求</button>
+    <button id="getCookiesBtn">提取并保存 Cookies</button>
+    <pre id="result"></pre>
+  </div>
+
+  <div class="tab-content hidden" id="tab-history">
+    <p>这里显示历史记录（待开发）</p>
+  </div>
+
+  <div class="tab-content hidden" id="tab-sites">
+    <h3>站点配置</h3>
+    <input type="text" id="siteDomain" placeholder="如 bilibili.com" />
+    <input type="text" id="siteReferer" placeholder="Referer 地址" />
+    <textarea id="siteHeaders" placeholder="Headers (JSON 格式)">{}</textarea>
+    <input type="text" id="siteCookieFile" placeholder="Cookies 文件名（可留空）" />
+    <button id="saveSiteConfig">保存配置</button>
+    <pre id="siteConfigStatus"></pre>
+  </div>
+
+  <div class="tab-content hidden" id="tab-cookies">
+    <p>这里管理 cookie 文件（待开发）</p>
+  </div>
+
+  <script src="popup.js" type="module"></script>
 </body>
 </html>

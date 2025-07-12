@@ -1,6 +1,18 @@
 // extension/popup.js
 import { extractCookiesAsNetscapeFormat, sendCookiesToNativeHost } from "./cookie-utils.js";
 
+// --- Tab 切换逻辑 ---
+document.querySelectorAll(".tab").forEach((tabBtn) => {
+  tabBtn.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(btn => btn.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.add("hidden"));
+
+    const selected = tabBtn.dataset.tab;
+    tabBtn.classList.add("active");
+    document.getElementById(`tab-${selected}`).classList.remove("hidden");
+  });
+});
+
 // 自动填充当前标签页地址
 document.getElementById("detectBtn").addEventListener("click", async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -75,4 +87,38 @@ document.getElementById("getCookiesBtn").addEventListener("click", async () => {
   } catch (err) {
     alert("❌ 提取 cookies 失败：" + err.message);
   }
+});
+
+// --- 保存站点配置 ---
+document.getElementById("saveSiteConfig").addEventListener("click", () => {
+  const domain = document.getElementById("siteDomain").value.trim();
+  const referer = document.getElementById("siteReferer").value.trim();
+  const headers = document.getElementById("siteHeaders").value.trim();
+  const cookieFile = document.getElementById("siteCookieFile").value.trim();
+
+  if (!domain) {
+    alert("请输入域名！");
+    return;
+  }
+
+  let parsedHeaders = {};
+  try {
+    parsedHeaders = headers ? JSON.parse(headers) : {};
+  } catch (err) {
+    alert("Headers 格式错误，请输入合法 JSON！");
+    return;
+  }
+
+  chrome.storage.local.get("siteConfigs", (data) => {
+    const allConfigs = data.siteConfigs || {};
+    allConfigs[domain] = {
+      referer,
+      headers: parsedHeaders,
+      cookies: cookieFile
+    };
+
+    chrome.storage.local.set({ siteConfigs: allConfigs }, () => {
+      document.getElementById("siteConfigStatus").textContent = `✅ 已保存配置：${domain}`;
+    });
+  });
 });
